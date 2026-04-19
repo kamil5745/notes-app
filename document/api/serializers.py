@@ -108,15 +108,15 @@ class NoteSerializer(serializers.ModelSerializer):
 
         tags = validated_data.pop('tags', [])
 
-        likes = validated_data.pop('likes', None)
+        #likes = validated_data.pop('likes', None)
 
         note = Note.objects.create(**validated_data)
 
         if tags:
             note.tags.set(tags)
 
-        if likes is not None:
-            note.likes.set(likes)
+        #if likes is not None:
+        #    note.likes.set(likes)
 
         for file in files_to_upload:
             NoteFile.objects.create(note=note, file=file)
@@ -149,7 +149,14 @@ class NoteSerializer(serializers.ModelSerializer):
         return obj.likes.count()
 
     def get_isliked(self, obj):
-        return obj.likes.filter(user=obj.user).exists()
+        request = self.context.get('request')
+
+        if not request or not request.user.is_authenticated:
+            return False
+
+        return obj.likes.filter(user=request.user).exists()
+
+        #return obj.likes.filter(user=obj.user).exists()
 
     def get_views_count(self, obj):
         return obj.views.count()
