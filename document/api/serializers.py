@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
-from document.models import Note, NoteFile, Category
+from document.models import Note, NoteFile, Category, Tag
 from django.core.validators import MinLengthValidator
 import os
 
@@ -36,6 +36,10 @@ class NoteFileSerializer(serializers.ModelSerializer):
         """Возвращает абсолютный URL файла"""
         return obj.file.url
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"
 
 class NoteSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
@@ -64,6 +68,12 @@ class NoteSerializer(serializers.ModelSerializer):
 
     category_name = serializers.SerializerMethodField(read_only=True)
 
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all(),
+        required=False
+    )
+
     likes_count = serializers.SerializerMethodField(read_only=True)
 
     isliked = serializers.SerializerMethodField(read_only=True)
@@ -88,16 +98,22 @@ class NoteSerializer(serializers.ModelSerializer):
             'likes_count',
             'isliked',
             'views_count',
-            'date'
+            'date',
+            'tags',
         ]
         read_only_fields = ['created_at', 'updated_at']
 
     def create(self, validated_data):
         files_to_upload = validated_data.pop('files_upload', [])
 
+        tags = validated_data.pop('tags', [])
+
         likes = validated_data.pop('likes', None)
 
         note = Note.objects.create(**validated_data)
+
+        if tags:
+            note.tags.set(tags)
 
         if likes is not None:
             note.likes.set(likes)
@@ -109,10 +125,14 @@ class NoteSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         files_to_upload = validated_data.pop('files_upload', [])
+        tags = validated_data.pop('tags', None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+
+        if tags is not None:
+            instance.tags.set(tags)
 
         for file in files_to_upload:
             NoteFile.objects.create(note=instance, file=file)
