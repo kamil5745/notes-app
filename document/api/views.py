@@ -1,10 +1,10 @@
-from document.models import View
+from document.models import View, Category
 from django.contrib.auth.models import User
 
 from .pagination import NotePagination
 from .permissions import IsOwner
 
-from document.api.serializers import NoteSerializer, UserSerializer
+from document.api.serializers import NoteSerializer, UserSerializer, CategorySerializer
 from document.models import Note, Like
 
 from rest_framework.decorators import action
@@ -15,6 +15,11 @@ from rest_framework import filters
 
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsAuthorOrReadOnly
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
 
 class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
