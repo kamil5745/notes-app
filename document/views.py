@@ -2,18 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.detail import View
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth import login, logout
-from document.models import Category, Note, Tag, View as ViewModel, Like
+from document.models import Category, Note, Tag
 
 
 class NoteSingleView(View):
     def get(self, request, slug):
         note = get_object_or_404(Note, slug=slug)
-
-        if request.user.is_authenticated:
-            ViewModel.objects.create(user=request.user, note=note)
-
-        return render(request, 'document/single.html', context={'note':note})
-
+        return render(request, 'document/single.html', context={'note': note})
 
 class NoteFilterView(View):
     def get(self, request):
@@ -47,34 +42,6 @@ class NoteFilterView(View):
             'selected_tags': tags_slug,
         })
 
-
-class NoteLikeView(View):
-    def post(self, request, slug):
-        note = get_object_or_404(Note, slug=slug)
-
-        if not request.user.is_authenticated:
-            return redirect('login-view')
-
-        like_queryset = Like.objects.filter(user=request.user, note=note)
-
-        if like_queryset.exists():
-            like_queryset.delete()
-        else:
-            Like.objects.create(user=request.user, note=note)
-
-        return redirect('single-view', slug=note.slug)
-
-
-class UserLikesView(View):
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return redirect('login-view')
-
-        notes = Note.objects.filter(likes__user=request.user)
-
-        return render(request, 'document/likes.html', {
-            'notes': notes,
-        })
 
 class NoteCreateView(View):
     def get(self, request):

@@ -15,8 +15,6 @@ from rest_framework import filters
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-
-
 class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
@@ -51,6 +49,14 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    def retrieve(self, request, *args, **kwargs):
+        note = self.get_object()
+
+        if request.user.is_authenticated:
+            View.objects.get_or_create(user=request.user, note=note)
+
+        serializer = self.get_serializer(note)
+        return Response(serializer.data)
 
     def _handle_views(self, user, notes):
         viewed_ids = View.objects.filter(user=user, note__in=notes).values_list('note_id', flat=True)
@@ -72,6 +78,16 @@ class NoteViewSet(viewsets.ModelViewSet):
         else:
             Like.objects.create(user=request.user, note=note)
             return Response({'liked': True}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def liked(self, request):
+        notes = Note.objects.filter(likes__user=request.user)
+        page = self.paginate_queryset(notes)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(notes, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
