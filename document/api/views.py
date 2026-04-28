@@ -41,6 +41,10 @@ class NoteViewSet(viewsets.ModelViewSet):
         if to_date:
             queryset = queryset.filter(created_at__date__lte=to_date)
 
+        category_name = self.request.GET.get('category')
+        if category_name:
+            queryset = queryset.filter(category__name=category_name)
+
         return queryset
 
     def list(self, request, *args, **kwargs):
