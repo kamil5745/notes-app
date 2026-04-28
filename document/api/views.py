@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import filters
 
 from django_filters.rest_framework import DjangoFilterBackend
+from .permissions import IsAuthorOrReadOnly
 
 class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
@@ -21,6 +22,7 @@ class NoteViewSet(viewsets.ModelViewSet):
     pagination_class = NotePagination
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['name', 'description', 'user__username']
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
     def get_queryset(self):
         queryset = Note.objects.all()
