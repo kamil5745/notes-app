@@ -17,21 +17,15 @@
 <div class="nav-left">
     <a href="{% url 'create-view' %}">Create note</a>
     <a href="{% url 'list-view' %}">Notes</a>
-    <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search...">
-
-        <input type="date" id="search-date-from">
-        <input type="date" id="search-date-to">
-
-        <button id="search-submit">Search</button>
-    </div>
+    {% block navbar%}
+    {% endblock %}
 </div>
 
 <div class="nav-right">
 
 {% if user.is_authenticated %}
 
-<span class="nav-user">{{ user.username }}</span>
+<span class="nav-user"><a href="{% url 'liked-view' %}">{{ user.username }}</a></span>
 
 <form method="POST" action="{% url 'logout-view' %}" class="logout-form">
 {% csrf_token %}
@@ -53,7 +47,6 @@
 {% block content %}{% endblock %}
 </div>
 
-<script src="{% static 'document/js/search.js' %}"></script>
 {% block scripts %}{% endblock %}
 
 </body>

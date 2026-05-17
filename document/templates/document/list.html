@@ -3,14 +3,30 @@
 
 {% block title %}Список конспектов{% endblock %}
 
+{% block navbar %}
+<div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search...">
+
+    <input type="date" id="search-date-from">
+    <input type="date" id="search-date-to">
+
+    <button id="search-submit">Search</button>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="main-content-wrapper" style="display: flex; flex-direction: column; width: 100%;">
     <div id="notes-container" class="notes-grid notes-container"></div>
     <div id="pagination-controls"></div>
     <div id="page-id">0/0</div>
 </div>
+
+{{ url_api|json_script:"url-api" }}
+{{ url_search|json_script:"url-search" }}
 {% endblock %}
 
+
 {% block scripts %}
+<script src="{% static 'document/js/search.js' %}"></script>
 <script src="{% static 'document/js/list.js' %}"></script>
 {% endblock %}

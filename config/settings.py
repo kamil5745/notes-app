@@ -41,11 +41,9 @@ INSTALLED_APPS = [
     'django_filters',
     'document',
     "rest_framework",
-    'corsheaders',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -134,12 +132,3 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
 }
-
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # для разработки
-
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:5500',
-#     'http://127.0.0.1:5500',
-#     'https://yoursite.ru',
-# ]
